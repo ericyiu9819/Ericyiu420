@@ -5,6 +5,8 @@ DOMAIN=""
 EMAIL=""
 PASSWORD=""
 DRY_RUN=0
+RELEASE_REPO="ericyiu9819/Ericyiu420"
+RELEASE_VERSION="latest"
 
 usage() {
   cat <<'USAGE'
@@ -15,6 +17,8 @@ Options:
   --domain     Domain name pointing to this VPS
   --email      ACME registration email
   --password   Trojan password used by Shadowrocket
+  --repo       GitHub repo for prebuilt binary, default ericyiu9819/Ericyiu420
+  --version    Release tag or latest, default latest
   --dry-run    Render checks and config without changing the system
 USAGE
 }
@@ -24,6 +28,8 @@ while [[ $# -gt 0 ]]; do
     --domain) DOMAIN="${2:-}"; shift 2 ;;
     --email) EMAIL="${2:-}"; shift 2 ;;
     --password) PASSWORD="${2:-}"; shift 2 ;;
+    --repo) RELEASE_REPO="${2:-}"; shift 2 ;;
+    --version) RELEASE_VERSION="${2:-}"; shift 2 ;;
     --dry-run) DRY_RUN=1; shift ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown option: $1" >&2; usage; exit 2 ;;
@@ -95,6 +101,7 @@ EOF_SERVICE
 
 if [[ "$DRY_RUN" -eq 1 ]]; then
   echo "[dry-run] Would install packages: certbot ca-certificates python3"
+  echo "[dry-run] Would download prebuilt binary from ${RELEASE_REPO} release ${RELEASE_VERSION}"
   echo "[dry-run] Would request certificate for ${DOMAIN} with ${EMAIL}"
   echo "[dry-run] Would write ${CONFIG_PATH}:"
   render_config
@@ -113,11 +120,24 @@ PY
 fi
 
 apt-get update
-apt-get install -y certbot ca-certificates python3
+apt-get install -y certbot ca-certificates python3 curl
 
 certbot certonly --standalone --non-interactive --agree-tos --email "$EMAIL" -d "$DOMAIN"
 
-if [[ -x "./target/release/proxy-server" ]]; then
+download_release_binary() {
+  local url
+  if [[ "$RELEASE_VERSION" == "latest" ]]; then
+    url="https://github.com/${RELEASE_REPO}/releases/latest/download/proxy-server-linux-amd64"
+  else
+    url="https://github.com/${RELEASE_REPO}/releases/download/${RELEASE_VERSION}/proxy-server-linux-amd64"
+  fi
+  curl -fL --retry 3 --connect-timeout 10 -o "$BIN_PATH" "$url"
+  chmod 0755 "$BIN_PATH"
+}
+
+if download_release_binary; then
+  :
+elif [[ -x "./target/release/proxy-server" ]]; then
   install -m 0755 ./target/release/proxy-server "$BIN_PATH"
 elif [[ -x "./bin/proxy-server-linux-amd64" ]]; then
   install -m 0755 ./bin/proxy-server-linux-amd64 "$BIN_PATH"
