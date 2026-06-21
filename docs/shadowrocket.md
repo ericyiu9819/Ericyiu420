@@ -5,14 +5,13 @@ Shadowrocket connects directly to this server over TCP/TLS using Trojan.
 ## Install on Debian/Ubuntu
 
 ```sh
-cargo build --release --bin proxy-server
 sudo bash scripts/install-trojan.sh \
   --domain example.com \
   --email admin@example.com \
   --password 'change-me-long-random-password'
 ```
 
-The script requests an ACME certificate with `certbot --standalone`, writes `/etc/lowprint/server.toml`, installs a systemd service, and prints a `trojan://` URI.
+The script downloads the prebuilt Linux amd64 binary from GitHub Releases, requests an ACME certificate with `certbot --standalone`, writes `/etc/lowprint/server.toml`, installs a systemd service, and prints a `trojan://` URI.
 
 ## Import into Shadowrocket
 
