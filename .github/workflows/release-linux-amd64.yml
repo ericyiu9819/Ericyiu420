@@ -8,6 +8,8 @@ on:
         required: true
         default: v0.1.0
   push:
+    branches:
+      - main
     tags:
       - "v*"
 
@@ -40,8 +42,10 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "tag=${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
-          else
+          elif [ "${GITHUB_REF_TYPE}" = "tag" ]; then
             echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=v0.1.0" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Publish release
