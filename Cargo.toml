@@ -1,0 +1,32 @@
+[package]
+name = "lowprint-tcp-proxy"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+
+[lib]
+name = "lowprint_tcp_proxy"
+path = "src/lib.rs"
+
+[[bin]]
+name = "proxy-server"
+path = "src/bin/proxy-server.rs"
+
+[dependencies]
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
+hex = "0.4"
+urlencoding = "2"
+rustls-pemfile = "2"
+serde = { version = "1", features = ["derive"] }
+sha2 = "0.10"
+subtle = "2"
+tokio = { version = "1", features = ["full"] }
+tokio-rustls = "0.26"
+toml = "0.8"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[dev-dependencies]
+rcgen = "0.13"
+tempfile = "3"
