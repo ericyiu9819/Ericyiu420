@@ -1,0 +1,14 @@
+[Unit]
+Description=Lowprint Trojan Server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/local/bin/proxy-server --config /etc/lowprint/server.toml
+Restart=on-failure
+RestartSec=3
+LimitNOFILE=1048576
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
