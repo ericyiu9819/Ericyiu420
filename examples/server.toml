@@ -1,0 +1,8 @@
+listen = "0.0.0.0:443"
+domain = "example.com"
+password = "change-me-long-random-password"
+cert_path = "/etc/letsencrypt/live/example.com/fullchain.pem"
+key_path = "/etc/letsencrypt/live/example.com/privkey.pem"
+node_name = "lowprint-example"
+log_level = "info"
+tcp_nodelay = true
