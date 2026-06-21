@@ -1,0 +1,54 @@
+name: release-linux-amd64
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag, for example v0.1.0
+        required: true
+        default: v0.1.0
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Test
+        run: cargo test
+
+      - name: Build
+        run: cargo build --release --bin proxy-server
+
+      - name: Prepare asset
+        run: |
+          install -m 0755 target/release/proxy-server proxy-server-linux-amd64
+          sha256sum proxy-server-linux-amd64 > proxy-server-linux-amd64.sha256
+
+      - name: Resolve tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tag=${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: ${{ steps.tag.outputs.tag }}
+          files: |
+            proxy-server-linux-amd64
+            proxy-server-linux-amd64.sha256
